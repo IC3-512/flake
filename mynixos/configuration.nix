@@ -33,15 +33,11 @@
     hideMounts = true;
     directories = [
       "/home/max/flake"
+      "/home/max/.ssh"
     ];
     files = [
       "/etc/machine-id"
-    ];
-    users.max = {
-      directories = [
-        ".ssh"
-      ];
-    };
+   ];
   };
   # networking.hostName = "nixos"; # Define your hostname.
   # Pick only one of the below networking options.
