@@ -2,10 +2,10 @@
   description = "My NixOS configuration";
 
   nixConfig = {
-      experimental-features = [
-        "flakes"
-        "nix-command"
-      ];
+    experimental-features = [
+      "flakes"
+      "nix-command"
+    ];
   };
 
   inputs = {
@@ -15,23 +15,44 @@
     impermanence.url = "github:nix-community/impermanence";
   };
 
-  outputs = { self, nixpkgs, flake-utils, nixos-hardware, impermanence, ... } @ inputs :
+  outputs = { self, nixpkgs, flake-utils, impermanence, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = import nixpkgs {
-          inherit system;
-        };
+        pkgs = import nixpkgs { inherit system; };
       in {
-        packages.default = pkgs.hello;
+        nixosConfigurations = {
+          main = pkgs.lib.nixosSystem {
+            system = system;
+            modules = [
+              impermanence.nixosModules.impermanence
+              ./hosts/main/configuration.nix
+              ./hosts/main/hardware-configuration.nix
+            ];
+          };
+          work = pkgs.lib.nixosSystem {
+            system = system;
+            modules = [
+              impermanence.nixosModules.impermanence
+              ./hosts/work/configuration.nix
+              ./hosts/work/hardware-configuration.nix
+            ];
+          };          
+          laptop = pkgs.lib.nixosSystem {
+            system = system;
+            modules = [
+              impermanence.nixosModules.impermanence
+              ./hosts/laptop/configuration.nix
+              ./hosts/laptop/hardware-configuration.nix
+            ];
+          };
+          server = pkgs.lib.nixosSystem {
+            system = system;
+            modules = [
+              impermanence.nixosModules.impermanence
+              ./hosts/server/configuration.nix
+              ./hosts/server/hardware-configuration.nix
+            ];
+        };
       }
-    ) // {
-      nixosConfigurations.mynixos = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [
-          inputs.impermanence.nixosModules.impermanence
-          ./mynixos/configuration.nix
-          ./mynixos/hardware-configuration.nix
-        ];
-      };
-    };
+    );
 }
