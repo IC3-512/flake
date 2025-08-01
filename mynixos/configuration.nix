@@ -33,6 +33,7 @@
     hideMounts = true;
     directories = [
       "/home/max/flake"
+      "/var/lib/nixos"
       "/home/max/.ssh"
     ];
     files = [
