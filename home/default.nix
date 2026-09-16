@@ -9,6 +9,7 @@
     ./programs/zsh.nix
     ./programs/starship.nix
     ./programs/yazi.nix
+    ./programs/tmux.nix
   ];
 
   home.username = "mentleutner";
