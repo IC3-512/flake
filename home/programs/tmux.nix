@@ -22,7 +22,7 @@
     aggressiveResize = true;
 
 
-    plugins = with pkgs; [
+        plugins = with pkgs; [
       tmuxPlugins.sensible
 
       {
@@ -38,6 +38,15 @@
           set -g default-command "${pkgs.zsh}/bin/zsh"
           set -g @continuum-restore 'on'
           set -g @continuum-save-interval '15'
+        '';
+      }
+
+      {
+        plugin = tmuxPlugins.logging;
+        extraConfig = ''
+          set -g @logging-path "$HOME/logs/tmux"
+          set -g @screen-capture-path "$HOME/logs/tmux"
+          set -g @save-complete-history-path "$HOME/logs/tmux"
         '';
       }
     ];
@@ -80,6 +89,27 @@
       # Don't rename windows automatically
       set -g allow-rename off
       set -g automatic-rename off
+
+
+      # Create a private log directory.
+      run-shell 'umask 077; ${pkgs.coreutils}/bin/mkdir -p "$HOME/logs/tmux"'
+
+      # Separate log per pane; strip terminal colour codes.
+      set -g @autolog-command 'umask 077; exec ${pkgs.coreutils}/bin/stdbuf -oL ${pkgs.ansifilter}/bin/ansifilter >> "$HOME/logs/tmux/tmux-#{pid}-#{pane_pid}-%Y%m%dT%H%M%S.log"'
+
+      # Automatically log new sessions, windows, and split panes.
+      set-hook -g after-new-session {
+        pipe-pane -o "#{T:@autolog-command}"
+      }
+      set-hook -g after-new-window {
+        pipe-pane -o "#{T:@autolog-command}"
+      }
+      set-hook -g after-split-window {
+        pipe-pane -o "#{T:@autolog-command}"
+      }
+
+      # Override the plugin toggle to control the same logging pipe.
+      bind-key P pipe-pane -o "#{T:@autolog-command}"
     '';
   };
 }
