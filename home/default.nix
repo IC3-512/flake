@@ -24,6 +24,6 @@
     jq
     btop
     doggo
-
+    gdu
   ];
 }
